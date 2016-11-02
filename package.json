@@ -1,0 +1,57 @@
+{
+  "name": "ormojo-redux",
+  "version": "0.0.1",
+  "description": "An ormojo backend that uses Redux.js as a backing store.",
+  "main": "lib/index.js",
+	"module": "es/index.js",
+	"jsnext:main": "es/index.js",
+  "scripts": {
+    "clean": "rimraf lib build es coverage",
+    "build": "npm run build:coffee && npm run build:babel:commonjs && npm run build:babel:es",
+		"build:babel:commonjs": "cross-env BABEL_ENV=commonjs babel build --out-dir lib",
+    "build:babel:es": "cross-env BABEL_ENV=es babel build --out-dir es",
+    "build:coffee": "mkdir -p build && coffee -o build src/*.coffee",
+    "doc:build": "node_modules/.bin/codo src/",
+    "prepublish": "npm run clean && npm run build",
+    "test": "node_modules/.bin/mocha --recursive --compilers coffee:coffee-script/register",
+    "coverage:build": "node_modules/.bin/mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul",
+    "coverage:report": "node_modules/.bin/istanbul report",
+    "coverage": "npm run coverage:build && npm run coverage:report",
+		"precommit": "npm run prepublish && npm run test",
+		"postcheckout": "npm install",
+		"postmerge": "npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ormojo/ormojo-redux.git"
+  },
+  "keywords": [
+    "quickstart",
+		"coffee",
+		"coffeescript",
+		"babel"
+  ],
+  "author": "William C. Johnson <wcjohnson@oigroup.net> (https://github.com/wcjohnson)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ormojo/ormojo-redux/issues"
+  },
+  "homepage": "https://github.com/ormojo/ormojo-redux",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "chai": "^3.5.0",
+    "coffee-coverage": "^1.0.1",
+    "coffee-script": "^1.11.1",
+    "cross-env": "^3.1.3",
+    "husky": "^0.11.9",
+    "istanbul": "^0.4.5",
+    "mocha": "^2.4.5",
+    "rimraf": "^2.5.4"
+  },
+  "dependencies": {
+  },
+  "peerDependencies": {
+		"redux": "^3.6.0"
+	}
+}
