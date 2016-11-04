@@ -1,6 +1,9 @@
-import { BoundModel, applyModelPropsToInstanceClass } from 'ormojo'
+import { BoundModel, applyModelPropsToInstanceClass, RxUtil } from 'ormojo'
 import ReduxInstance from './ReduxInstance'
 import cuid from 'cuid'
+import { makeSelectorObservable } from './Util'
+
+mapWithSideEffects = RxUtil.mapWithSideEffects
 
 initialState = {
 	byId: {}
@@ -14,9 +17,13 @@ export default class ReduxBoundModel extends BoundModel
 	initialize: ->
 		@instanceClass = applyModelPropsToInstanceClass(@, (class BoundReduxInstance extends ReduxInstance))
 		@createAction = "CREATE_#{@name}_ReduxBoundModel"
+		@resetAction = "RESET_#{@name}_ReduxBoundModel"
 		@updateAction = "UPDATE_#{@name}_ReduxBoundModel"
 		@deleteAction = "DELETE_#{@name}_ReduxBoundModel"
 
+	# Internal version of put that doesn't do a defensive copy.
+	# Only use this if you're sure you're not going to accidentally mutate the DataValues later,
+	# which would break Redux's contract.
 	_put: (dataValues, shouldCreate = true) ->
 		if shouldCreate
 			if not dataValues.id then dataValues.id = cuid()
@@ -65,8 +72,47 @@ export default class ReduxBoundModel extends BoundModel
 
 	getState: -> @state or initialState
 
+	getSelector: ->
+		if @selector then return @selector
+		return (@selector = makeSelectorObservable (=> @state), @backend.store)
+
+	# Implement the ormojo.Store interface.
+	getById: (id) -> @state.byId[id]
+	forEach: (func) -> func(v, k) for k,v of @state.byId; undefined
+
+	# Implement the ormojo.Reducible interface.
+	reduce: (action) ->
+		myActionType = switch action.type
+			when 'CREATE' then @createAction
+			when 'UPDATE' then @updateAction
+			when 'DELETE' then @deleteAction
+			when 'RESET' then @resetAction
+			else throw new Error('expected CRUD action')
+
+		# Dispatch a synchronous action to the Redux store
+		@backend.store.dispatch({
+			type: myActionType
+			payload: action.payload
+		})
+
+		# Tag us as the Store in future actions on this pipeline
+		{
+			type: action.type
+			payload: action.payload
+			meta: Object.assign({}, action.meta, { store: @ })
+		}
+
+	connectAfter: (observable) ->
+		# XXX: Merge in a Subject here so we can inject RESET events downstream.
+		# We should emit a RESET event when something like a time-travel happens
+		# so that derived data can be rebuilt.
+		mapWithSideEffects(observable, @reduce, @)
+
 	getReducer: ->
 		(state = initialState, action) =>
+			# XXX: detect RESET here?
+			# Would be an impure behavior, but without it we can't support
+			# time travel.
 			ns = switch action.type
 				when @createAction
 					nextById = Object.assign({}, state.byId)
@@ -84,7 +130,8 @@ export default class ReduxBoundModel extends BoundModel
 
 				when @deleteAction
 					nextById = Object.assign({}, state.byId)
-					delete nextById[id] for id in action.payload
+					for id in action.payload
+						delete nextById[id]
 					nextIds = state.ids.filter( (x) -> not (x in action.payload) )
 					{ ids: nextIds, byId: nextById }
 
