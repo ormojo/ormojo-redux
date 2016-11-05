@@ -1,5 +1,10 @@
 import { RxUtil, Observable } from 'ormojo'
 
+export shallowDiff = (a, b) ->
+	return true for i of a when not (i of b)
+	return true for i of b when a[i] isnt b[i]
+	false
+
 export makeSelectorObservable = (selectorFn, store) ->
 	RxUtil.defineObservableSymbol(selectorFn, ->
 		new Observable (observer) ->

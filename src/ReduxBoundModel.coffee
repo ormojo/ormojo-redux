@@ -1,7 +1,7 @@
 import { BoundModel, applyModelPropsToInstanceClass, RxUtil } from 'ormojo'
 import ReduxInstance from './ReduxInstance'
 import cuid from 'cuid'
-import { makeSelectorObservable } from './Util'
+import { makeSelectorObservable, shallowDiff } from './Util'
 
 mapWithSideEffects = RxUtil.mapWithSideEffects
 
@@ -128,7 +128,8 @@ export default class ReduxBoundModel extends BoundModel
 					nextIds = state.ids.slice()
 					for entity in action.payload
 						if entity.id of nextById
-							nextById[entity.id] = Object.assign({}, nextById[entity.id], entity)
+							if shallowDiff(nextById[entity.id], entity)
+								nextById[entity.id] = Object.assign({}, nextById[entity.id], entity)
 						else
 							nextById[entity.id] = entity
 							nextIds.push(entity.id)
