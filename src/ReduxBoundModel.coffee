@@ -130,10 +130,8 @@ export default class ReduxBoundModel extends BoundModel
 					for entity in action.payload
 						if entity.id of nextById
 							if not equalityTest(nextById[entity.id], entity)
-								console.log("diffing #{entity.id}", nextById[entity.id], entity)
 								nextById[entity.id] = Object.assign({}, nextById[entity.id], entity)
 						else
-							console.log("adding #{entity.id}")
 							nextById[entity.id] = entity
 							nextIds.push(entity.id)
 					{ ids: nextIds, byId: nextById }
