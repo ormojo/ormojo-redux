@@ -1,7 +1,6 @@
 { expect } = require 'chai'
-{ RxUtil } = require 'ormojo'
+{ RxUtil, Observable } = require 'ormojo'
 makeCorpus = require './helpers/makeCorpus'
-Observable = require 'any-observable'
 
 expectTests = (tests) ->
 	i = 0

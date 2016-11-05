@@ -1,5 +1,4 @@
-import { RxUtil } from 'ormojo'
-import Observable from 'any-observable'
+import { RxUtil, Observable } from 'ormojo'
 
 export makeSelectorObservable = (selectorFn, store) ->
 	RxUtil.defineObservableSymbol(selectorFn, ->
@@ -16,7 +15,7 @@ export makeSelectorObservable = (selectorFn, store) ->
 
 			# Observe initial state
 			observeState()
-			
+
 			# Returns unsubscriber func
 			store.subscribe(observeState)
 	)
