@@ -109,12 +109,13 @@ export default class ReduxBoundModel extends BoundModel
 		mapWithSideEffects(observable, @reduce, @)
 
 	getReducer: ->
+		{ createAction, updateAction, deleteAction } = @
 		(state = initialState, action) =>
 			# XXX: detect RESET here?
 			# Would be an impure behavior, but without it we can't support
 			# time travel.
 			ns = switch action.type
-				when @createAction
+				when createAction
 					nextById = Object.assign({}, state.byId)
 					nextIds = state.ids.slice()
 					for entity in action.payload
@@ -122,13 +123,13 @@ export default class ReduxBoundModel extends BoundModel
 						nextById[entity.id] = entity
 					{ ids: nextIds, byId: nextById }
 
-				when @updateAction
+				when updateAction
 					nextById = Object.assign({}, state.byId)
 					for entity in action.payload
 						nextById[entity.id] = entity
 					{ ids: state.ids, byId: nextById }
 
-				when @deleteAction
+				when deleteAction
 					nextById = Object.assign({}, state.byId)
 					for id in action.payload
 						delete nextById[id]
