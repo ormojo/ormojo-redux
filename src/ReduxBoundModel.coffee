@@ -20,6 +20,7 @@ export default class ReduxBoundModel extends BoundModel
 		@resetAction = "RESET_#{@name}_ReduxBoundModel"
 		@updateAction = "UPDATE_#{@name}_ReduxBoundModel"
 		@deleteAction = "DELETE_#{@name}_ReduxBoundModel"
+		@equalityTest = @spec.equalityTest or ( (a,b) -> not shallowDiff(a,b) )
 
 	# Internal version of put that doesn't do a defensive copy.
 	# Only use this if you're sure you're not going to accidentally mutate the DataValues later,
@@ -109,7 +110,7 @@ export default class ReduxBoundModel extends BoundModel
 		mapWithSideEffects(observable, @reduce, @)
 
 	getReducer: ->
-		{ createAction, updateAction, deleteAction } = @
+		{ createAction, updateAction, deleteAction, equalityTest } = @
 		(state = initialState, action) =>
 			# XXX: detect RESET here?
 			# Would be an impure behavior, but without it we can't support
@@ -128,9 +129,11 @@ export default class ReduxBoundModel extends BoundModel
 					nextIds = state.ids.slice()
 					for entity in action.payload
 						if entity.id of nextById
-							if shallowDiff(nextById[entity.id], entity)
+							if not equalityTest(nextById[entity.id], entity)
+								console.log("diffing #{entity.id}", nextById[entity.id], entity)
 								nextById[entity.id] = Object.assign({}, nextById[entity.id], entity)
 						else
+							console.log("adding #{entity.id}")
 							nextById[entity.id] = entity
 							nextIds.push(entity.id)
 					{ ids: nextIds, byId: nextById }
