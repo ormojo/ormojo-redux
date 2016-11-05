@@ -125,9 +125,14 @@ export default class ReduxBoundModel extends BoundModel
 
 				when updateAction
 					nextById = Object.assign({}, state.byId)
+					nextIds = state.ids.slice()
 					for entity in action.payload
-						nextById[entity.id] = entity
-					{ ids: state.ids, byId: nextById }
+						if entity.id of nextById
+							nextById[entity.id] = Object.assign({}, nextById[entity.id], entity)
+						else
+							nextById[entity.id] = entity
+							nextIds.push(entity.id)
+					{ ids: nextIds, byId: nextById }
 
 				when deleteAction
 					nextById = Object.assign({}, state.byId)
