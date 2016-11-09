@@ -81,34 +81,6 @@ export default class ReduxBoundModel extends BoundModel
 	getById: (id) -> @state.byId[id]
 	forEach: (func) -> func(v, k) for k,v of @state.byId; undefined
 
-	# Implement the ormojo.Reducible interface.
-	reduce: (action) ->
-		myActionType = switch action.type
-			when 'CREATE' then @createAction
-			when 'UPDATE' then @updateAction
-			when 'DELETE' then @deleteAction
-			when 'RESET' then @resetAction
-			else throw new Error('expected CRUD action')
-
-		# Dispatch a synchronous action to the Redux store
-		@backend.store.dispatch({
-			type: myActionType
-			payload: action.payload
-		})
-
-		# Tag us as the Store in future actions on this pipeline
-		{
-			type: action.type
-			payload: action.payload
-			meta: Object.assign({}, action.meta, { store: @ })
-		}
-
-	connectAfter: (observable) ->
-		# XXX: Merge in a Subject here so we can inject RESET events downstream.
-		# We should emit a RESET event when something like a time-travel happens
-		# so that derived data can be rebuilt.
-		mapWithSideEffects(observable, @reduce, @)
-
 	getReducer: ->
 		{ createAction, updateAction, deleteAction, equalityTest } = @
 		(state = initialState, action) =>

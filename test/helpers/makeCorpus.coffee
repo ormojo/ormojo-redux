@@ -1,5 +1,5 @@
 ormojo = require 'ormojo'
-{ ReduxBackend } = require '../..'
+{ ReduxBackend, ReducibleReduxBoundModel } = require '../..'
 { createStore, applyMiddleware } = require 'redux'
 ReduxDebug = require 'redux-debug'
 ReduxFreeze = require 'redux-freeze'
@@ -52,6 +52,8 @@ makeCorpus = ->
 	store = applyMiddleware(ReduxDebug(console.log), ReduxFreeze)(createStore)(reduxBackend.getReducer())
 	reduxBackend.setStore(store)
 
-	{ corpus, Widget, store }
+	ReducibleWidget = new ReducibleReduxBoundModel(Widget)
+
+	{ corpus, Widget, store, ReducibleWidget }
 
 module.exports = makeCorpus

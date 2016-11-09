@@ -12,7 +12,7 @@ expectTests = (tests) ->
 
 describe 'rx', ->
 	it 'CRUD actions affect Redux store', ->
-		{corpus, Widget} = makeCorpus()
+		{corpus, ReducibleWidget: Widget} = makeCorpus()
 
 		inj = new RxUtil.Subject
 		Widget.connectAfter(inj)
@@ -26,7 +26,7 @@ describe 'rx', ->
 		expect(sel().byId['1']).to.be.not.ok
 
 	it 'should make selectors into Observables', ->
-		{corpus, Widget} = makeCorpus()
+		{corpus, ReducibleWidget: Widget} = makeCorpus()
 
 		inj = new RxUtil.Subject
 		Widget.connectAfter(inj)
