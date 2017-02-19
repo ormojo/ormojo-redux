@@ -7,7 +7,7 @@ export default class ReduxCollector extends HydratingCollector
 	set: (id, val) ->
 		# Val is a ReduxBoundInstance here...
 		@byId[id] = val
-		@component.update(val._getDataValues())
+		@component.update([val._getDataValues()])
 
 	remove: (id) ->
 		delete @byId[id]

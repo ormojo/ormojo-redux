@@ -48,6 +48,10 @@ OrmojoReduxStoreComponent = createClass {
 		delete: (ids) -> { type: @DELETE, payload: ids }
 	}
 
+	selectors: {
+		byId: (state) -> state
+	}
+
 	getById: (id) -> @state[id]
 }
 
