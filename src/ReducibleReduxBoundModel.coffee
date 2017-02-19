@@ -1,36 +1,14 @@
-import { Reducible } from 'ormojo'
+import { HydratingCollector } from 'ormojo'
 
-export default class ReducibleReduxBoundModel extends Reducible
-	constructor: (@boundModel) ->
-		super()
+export default class ReduxCollector extends HydratingCollector
+	constructor: ({@component})->
+		super
 
-	# Implement the ormojo.Store interface
-	getById: (id) -> @boundModel.getById(id)
-	forEach: (func) -> @boundModel.forEach(func)
+	set: (id, val) ->
+		# Val is a ReduxBoundInstance here...
+		@byId[id] = val
+		@component.update(val._getDataValues())
 
-	# Passthru some useful functions from the boundModel
-	getSelector: -> @boundModel.getSelector()
-
-	# Implement the ormojo.Reducible interface.
-	reduce: (action) ->
-		myActionType = switch action.type
-			when 'CREATE' then @boundModel.createAction
-			when 'UPDATE' then @boundModel.updateAction
-			when 'DELETE' then @boundModel.deleteAction
-			when 'RESET' then @boundModel.resetAction
-			else null
-
-		if not myActionType then return action
-
-		# Dispatch a synchronous action to the Redux store
-		@boundModel.backend.store.dispatch({
-			type: myActionType
-			payload: action.payload
-		})
-
-		# Tag us as the Store in future actions on this pipeline
-		{
-			type: action.type
-			payload: action.payload
-			meta: Object.assign({}, action.meta, { store: @ })
-		}
+	remove: (id) ->
+		delete @byId[id]
+		@component.delete([id])

@@ -1,6 +1,6 @@
 import { Backend } from 'ormojo'
 import ReduxBoundModel from './ReduxBoundModel'
-import { combineReducers } from 'redux'
+import { createComponent } from 'redux-components'
 
 export default class ReduxBackend extends Backend
 	constructor: ->
@@ -13,11 +13,10 @@ export default class ReduxBackend extends Backend
 		@boundModels[m.name] = m
 		m
 
-	getReducer: ->
+	getReduxComponent: ->
+		if @_reduxComponent then return @_reduxComponent
+
 		structure = {}
-		structure[k] = v.getReducer() for k,v of @boundModels
-		combineReducers(structure)
+		structure[k] = v.getReduxComponent() for k,v of @boundModels
 
-	setStore: (@store) ->
-
-	dispatch: -> @store.dispatch.apply(@store, arguments)
+		@_reduxComponent = createComponent(structure)

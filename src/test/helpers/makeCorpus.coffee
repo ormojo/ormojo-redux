@@ -3,6 +3,7 @@ ormojo = require 'ormojo'
 { createStore, applyMiddleware } = require 'redux'
 ReduxDebug = require 'redux-debug'
 ReduxFreeze = require 'redux-freeze'
+{ mountRootComponent } = require 'redux-components'
 
 makeCorpus = ->
 	logger = if 'trace' in process.argv then console.log.bind(console) else ->
@@ -49,8 +50,9 @@ makeCorpus = ->
 		}
 	}).forBackend('redux')
 
-	store = applyMiddleware(ReduxDebug(console.log), ReduxFreeze)(createStore)(reduxBackend.getReducer())
-	reduxBackend.setStore(store)
+	component = reduxBackend.getReduxComponent()
+	store = applyMiddleware(ReduxDebug(console.log), ReduxFreeze)(createStore)( (x) -> x )
+	mountRootComponent(store, component)
 
 	ReducibleWidget = new ReducibleReduxBoundModel(Widget)
 

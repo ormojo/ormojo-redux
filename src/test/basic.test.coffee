@@ -10,6 +10,7 @@ describe 'basic tests: ', ->
 
 		testThing = null
 		awidget.save().then (thing) ->
+			console.log { thing }
 			thing
 		.then (thing) ->
 			testThing = thing
@@ -75,6 +76,7 @@ describe 'basic tests: ', ->
 			Widget.findById(id)
 		.then (x) ->
 			expect(x).to.equal(undefined)
+			expect(Widget.getReduxComponent().state).to.deep.equal({})
 
 	it 'should diff', ->
 		{ Widget } = makeCorpus()
