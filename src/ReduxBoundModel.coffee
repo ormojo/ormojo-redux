@@ -54,8 +54,8 @@ class ReduxStore extends Store
 			results
 
 class ReduxQuery extends Query
-	constructor: (id) ->
-		if Array.isArray(id) then @ids = id else @ids = [id]
+	constructor: ->
+		super
 
 export default class ReduxBoundModel extends BoundModel
 	constructor: (model, backend, bindingOptions) ->
@@ -66,11 +66,5 @@ export default class ReduxBoundModel extends BoundModel
 
 	initialize: ->
 		@instanceClass = applyModelPropsToInstanceClass(@, (class BoundReduxInstance extends ReduxInstance))
-
-	findById: (id) ->
-		@store.read(new ReduxQuery(id))
-		.then (readData) =>
-			hydrated = (@hydrator.didRead(null, datum) for datum in readData)
-			if Array.isArray(id) then hydrated else hydrated[0]
 
 	getReduxComponent: -> @store.component
