@@ -1,8 +1,11 @@
-import { BoundModel, applyModelPropsToInstanceClass, RxUtil, Store, Query, Hydrator } from 'ormojo'
+import { BoundModel, applyModelPropsToInstanceClass, RxUtil, Store, Query, Hydrator, ResultSet } from 'ormojo'
 import ReduxInstance from './ReduxInstance'
 import cuid from 'cuid'
 import { makeSelectorObservable, shallowDiff } from './Util'
 import OrmojoStore from './OrmojoStore'
+
+class ReduxResultSet extends ResultSet
+	constructor: (@results) ->
 
 class ReduxStore extends Store
 	constructor: ({equalityTest}) ->
@@ -26,7 +29,7 @@ class ReduxStore extends Store
 		@corpus.Promise.resolve().then =>
 			if not query?.ids? then throw new Error("invalid query format")
 			stateNow = @component.state # synchronously safe
-			stateNow[id] for id in query.ids
+			new ReduxResultSet( (stateNow[id] for id in query.ids) )
 
 	create: (data) ->
 		@crupsert(data, true)
