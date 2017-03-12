@@ -15,21 +15,21 @@ class ReduxStore extends Store
 
 	crupsert: (data, isCreate) ->
 		@corpus.Promise.resolve().then =>
-			for datum in data
-				if (not datum?) then throw new Error("invalid create format")
+			for datum in data when datum?
 				if not datum.id then datum.id = cuid()
 				if isCreate and @component.state[datum.id]? then throw new Error("duplicate id")
 				datum
 			if isCreate then @component.create(data) else @component.update(data)
 			# Return the now-updated states
 			stateNow = @component.state
-			(stateNow[datum.id] for datum in data)
+			for datum in data
+				if datum? then stateNow[datum.id] else undefined
 
 	read: (query) ->
 		@corpus.Promise.resolve().then =>
 			if not query?.ids? then throw new Error("invalid query format")
 			stateNow = @component.state # synchronously safe
-			new ReduxResultSet( (stateNow[id] for id in query.ids) )
+			new ReduxResultSet( ( (if id? then stateNow[id]) for id in query.ids) )
 
 	create: (data) ->
 		@crupsert(data, true)
@@ -37,12 +37,13 @@ class ReduxStore extends Store
 	update: (data) ->
 		@corpus.Promise.resolve().then =>
 			stateNow = @component.state
-			for datum in data
+			for datum in data when datum?
 				if not datum?.id? then throw new Error("invalid update format")
 				if not stateNow[datum.id]? then throw new Error("update of nonexistent object")
 			@component.update(data)
 			stateNow = @component.state
-			(stateNow[datum.id] for datum in data)
+			for datum in data
+				if datum? then stateNow[datum.id] else undefined
 
 	upsert: (data) ->
 		@crupsert(data, false)

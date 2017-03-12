@@ -16,12 +16,12 @@ export default OrmojoStore = createClass {
 		switch action.type
 			when @CREATE
 				nextState = Object.assign({}, state)
-				(nextState[entity.id] = entity) for entity in action.payload
+				(nextState[entity.id] = entity) for entity in action.payload when entity?
 				nextState
 
 			when @UPDATE
 				nextState = state
-				for entity in action.payload
+				for entity in action.payload when entity?
 					if entity.id of nextState
 						if not equalityTest(nextState[entity.id], entity)
 							if nextState is state then nextState = Object.assign({}, state)
@@ -33,7 +33,7 @@ export default OrmojoStore = createClass {
 
 			when @DELETE
 				nextState = state
-				for id in action.payload
+				for id in action.payload when id?
 					if id of nextState
 						 if nextState is state then nextState = Object.assign({}, state)
 						 delete nextState[id]
