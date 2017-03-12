@@ -53,10 +53,10 @@
     "rimraf": "^2.5.4"
   },
   "dependencies": {
-    "cuid": "^1.3.8",
-    "redux-components": "^0.3.2"
+    "cuid": "^1.3.8"
   },
   "peerDependencies": {
-    "ormojo": "^0.2.0"
+    "ormojo": "^0.2.0",
+		"redux-components": "^0.3.2"
   }
 }
